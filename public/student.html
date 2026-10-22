@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My clearance</title>
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+
+  <body>
+    <main class="container">
+
+      <!-- Tab 1: the student's clearance request -->
+      <section id="tab-request">
+        <div id="current-request"></div>
+        <div id="certificate"></div>
+        <div id="earlier-requests"></div>
+      </section>
+
+      <!-- Tab 2: chatbot -->
+      <section id="tab-assistant" hidden>
+        <div class="card">
+          <div class="row">
+            <h3>Clearance assistant</h3>
+            <button class="btn btn-danger btn-small" id="clear-chat">Clear chat</button>
+          </div>
+          <p class="muted">Ask about your status, why an office rejected you, or what to do next.</p>
+
+          <div class="chat-box" id="chat-box"></div>
+
+          <form class="chat-form" id="chat-form">
+            <input id="question" placeholder="Type your question" required>
+            <button class="btn">Ask</button>
+          </form>
+        </div>
+      </section>
+
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/vendor/qrcode.js"></script>
+    <script src="js/student.js"></script>
+  </body>
+</html>

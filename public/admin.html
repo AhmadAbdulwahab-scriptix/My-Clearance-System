@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Administration</title>
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+
+  <body>
+    <main class="container">
+
+      <!-- Tab 1: overview numbers -->
+      <section id="tab-overview">
+        <div class="stats" id="overview-stats"></div>
+        <div class="card">
+          <h3>Offices with the most pending items</h3>
+          <div class="table-wrap" id="overview-offices"></div>
+        </div>
+      </section>
+
+      <!-- Tab 2: students (search and filters) -->
+      <section id="tab-students" hidden>
+        <div class="card">
+          <form id="students-filter">
+            <div class="filters">
+              <label>
+                Search
+                <input name="search" placeholder="Name or reg. no.">
+              </label>
+              <label>
+                Year in reg. no.
+                <input name="year" placeholder="e.g. /22/">
+              </label>
+              <label>
+                Clearance status
+                <select name="status">
+                  <option value="">Any</option>
+                  <option value="approved">Completed</option>
+                  <option value="pending">Pending</option>
+                </select>
+              </label>
+              <label>
+                Rejection category
+                <select name="rejectionCategory">
+                  <option value="">Any</option>
+                  <option>Missing Document</option>
+                  <option>Unpaid Fee</option>
+                  <option>Disciplinary</option>
+                  <option>Other</option>
+                </select>
+              </label>
+              <label>
+                Overdue (days)
+                <input name="overdueDays" type="number" min="1" placeholder="e.g. 7">
+              </label>
+              <label>
+                Requested after
+                <input name="createdAfter" type="date">
+              </label>
+              <label>
+                Requested before
+                <input name="createdBefore" type="date">
+              </label>
+              <label>
+                Department
+                <input name="department">
+              </label>
+              <label>
+                Sort by
+                <select name="sort">
+                  <option value="-createdAt">Newest first</option>
+                  <option value="createdAt">Oldest first</option>
+                  <option value="name">Name A-Z</option>
+                  <option value="-name">Name Z-A</option>
+                  <option value="regNumber">Reg. no.</option>
+                </select>
+              </label>
+              <label>
+                <input type="checkbox" name="hasRejection" value="true">
+                Has a rejection
+              </label>
+            </div>
+            <button class="btn">Apply filters</button>
+            <button type="button" class="btn btn-danger" id="students-reset">Reset</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <p class="muted" id="students-count"></p>
+          <div class="table-wrap" id="students-list"></div>
+        </div>
+      </section>
+
+      <!-- Tab 3: clearance items (reassign / approve for an office) -->
+      <section id="tab-items" hidden>
+        <div class="card">
+          <form id="items-filter">
+            <div class="filters">
+              <label>
+                Search student
+                <input name="search" placeholder="Name or reg. no.">
+              </label>
+              <label>
+                Status
+                <select name="status">
+                  <option value="">Any</option>
+                  <option value="pending">Pending</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="approved">Approved</option>
+                  <option value="locked">Locked</option>
+                </select>
+              </label>
+              <label>
+                Waiting at least (days)
+                <input name="overdueDays" type="number" min="1" placeholder="e.g. 7">
+              </label>
+            </div>
+            <button class="btn">Apply filters</button>
+            <button type="button" class="btn btn-danger" id="items-reset">Reset</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="table-wrap" id="items-list"></div>
+          <div class="row row-end" id="items-pager"></div>
+        </div>
+      </section>
+
+      <!-- Tab 4: office personnel -->
+      <section id="tab-personnel" hidden>
+        <div class="card">
+          <h3>Add office personnel</h3>
+          <form id="personnel-form">
+            <div class="filters">
+              <label>
+                Name
+                <input name="name" required>
+              </label>
+              <label>
+                Email
+                <input name="email" type="email" required>
+              </label>
+              <label>
+                Password
+                <input name="password" type="password" minlength="6" required>
+              </label>
+              <label>
+                Office
+                <input name="officeName" required placeholder="e.g. Library">
+              </label>
+            </div>
+            <button class="btn">Create account</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="row">
+            <h3>Personnel</h3>
+            <select id="personnel-status" style="width: auto">
+              <option value="">All</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="table-wrap" id="personnel-list"></div>
+        </div>
+      </section>
+
+      <!-- Tab 5: analytics -->
+      <section id="tab-analytics" hidden>
+        <div class="card">
+          <h3>Rejections by category</h3>
+          <div id="rejection-bars"></div>
+        </div>
+        <div class="card">
+          <h3>Average time to respond, by officer</h3>
+          <div class="table-wrap" id="bottleneck-list"></div>
+        </div>
+      </section>
+
+      <!-- Tab 6: search everything -->
+      <section id="tab-search" hidden>
+        <div class="card">
+          <h3>Search</h3>
+          <form class="chat-form" id="search-form">
+            <input name="q" minlength="2" required placeholder="Student, officer, office or certificate code">
+            <button class="btn">Search</button>
+          </form>
+          <div id="search-results"></div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Popup that shows one student's full clearance details -->
+    <dialog id="student-detail" class="wide"></dialog>
+
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/admin.js"></script>
+  </body>
+</html>

@@ -1,0 +1,945 @@
+/* ==========================================================================
+   Student Clearance System - stylesheet
+   Look and feel inspired by PalmPay: violet brand colour, white cards on a
+   soft lavender background, rounded corners, pill buttons.
+
+   To change the brand colour, edit --primary in the :root block below.
+   ========================================================================== */
+
+
+/* 1. Colours and sizes (change them here, everything else follows)
+   -------------------------------------------------------------------------- */
+:root {
+  --primary: #6b2bd9;         /* main violet */
+  --primary-dark: #5420b3;    /* hover state */
+  --primary-soft: #f0e9fd;    /* light violet for active tabs and highlights */
+
+  --page-bg: #f6f4fb;         /* page background */
+  --card-bg: #ffffff;
+  --border: #e4dff0;
+
+  --text: #1f1a33;
+  --text-muted: #6b6785;
+
+  --success: #12a150;
+  --success-bg: #e6f6ed;
+  --warning: #b36b00;
+  --warning-bg: #fff3d9;
+  --danger: #d92d20;
+  --danger-bg: #fdebe9;
+
+  --radius: 12px;
+  --radius-small: 8px;
+}
+
+
+/* 2. Base
+   -------------------------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--page-bg);
+  color: var(--text);
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 600;
+}
+
+h2 {
+  font-size: 18px;
+}
+
+h3 {
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+p {
+  margin: 6px 0;
+}
+
+a {
+  color: var(--primary);
+}
+
+small {
+  color: var(--text-muted);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+
+/* 3. Page layout: header, tabs, content area
+   -------------------------------------------------------------------------- */
+.top-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.top-bar .brand {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.top-bar .brand span {
+  margin-left: 10px;
+  font-size: 13px;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.top-bar .user-area {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  padding: 10px 24px;
+  overflow-x: auto;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.tabs button {
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tabs button:hover {
+  background: var(--page-bg);
+}
+
+.tabs button.active {
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 24px auto;
+  padding: 0 24px;
+}
+
+
+/* 4. Cards
+   -------------------------------------------------------------------------- */
+.card {
+  margin-bottom: 18px;
+  padding: 20px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.row-end {
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.late {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+
+/* 5. Buttons
+   -------------------------------------------------------------------------- */
+.btn {
+  padding: 9px 20px;
+  border: 1px solid var(--primary);
+  border-radius: 999px;
+  background: var(--primary);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.btn-outline {
+  background: #ffffff;
+  color: var(--primary);
+}
+
+.btn-outline:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+
+.btn-danger {
+  background: #ffffff;
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.btn-danger:hover {
+  background: var(--danger-bg);
+  border-color: var(--danger);
+}
+
+.btn-small {
+  padding: 4px 12px;
+  font-size: 13px;
+}
+
+/* A button that looks like a text link */
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+
+/* 6. Forms
+   -------------------------------------------------------------------------- */
+label {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  margin-top: 4px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  background: #ffffff;
+  color: var(--text);
+  font: inherit;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+input[type="checkbox"] {
+  width: auto;
+  margin-right: 6px;
+}
+
+/* Grid of filter fields */
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0 14px;
+  align-items: end;
+}
+
+
+/* 7. Tables
+   -------------------------------------------------------------------------- */
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  padding: 10px 12px;
+  background: var(--page-bg);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+}
+
+td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+tr:last-child td {
+  border-bottom: 0;
+}
+
+
+/* 8. Status badges
+   -------------------------------------------------------------------------- */
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-approved,
+.badge-completed,
+.badge-active {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.badge-pending {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.badge-rejected,
+.badge-inactive {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.badge-locked {
+  background: var(--page-bg);
+  color: var(--text-muted);
+}
+
+
+/* 9. Number cards (statistics)
+   -------------------------------------------------------------------------- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.stat {
+  padding: 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.stat strong {
+  display: block;
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.stat small {
+  display: block;
+  margin-top: 2px;
+}
+
+/* First card in each row of stats gets the brand colour */
+.stat.highlight {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+.stat.highlight small {
+  color: #ffffff;
+  opacity: 0.85;
+}
+
+
+/* 10. Horizontal bars (analytics)
+   -------------------------------------------------------------------------- */
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.bar-label {
+  min-width: 140px;
+}
+
+.bar-fill {
+  height: 14px;
+  border-radius: 999px;
+  background: var(--primary);
+}
+
+
+/* 11. Popups: modal dialog, toast message, notification list
+   -------------------------------------------------------------------------- */
+dialog {
+  width: min(440px, 92vw);
+  padding: 22px;
+  border: 0;
+  border-radius: var(--radius);
+  color: var(--text);
+}
+
+dialog.wide {
+  width: min(860px, 94vw);
+  max-height: 88vh;
+  overflow-y: auto;
+}
+
+dialog::backdrop {
+  background: rgba(31, 26, 51, 0.5);
+}
+
+/* Message box: pops up next to the button that was clicked, then fades out */
+#toast {
+  position: fixed;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(340px, 90vw);
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: var(--radius-small);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 20px rgba(31, 26, 51, 0.16);
+  font-size: 14px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+  pointer-events: none;
+}
+
+#toast.show {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+#toast.success {
+  border-left-color: var(--success);
+}
+
+#toast.error {
+  border-left-color: var(--danger);
+  background: rgba(253, 235, 233, 0.92);
+  color: #8c1d14;
+}
+
+.toast-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+#toast.success .toast-icon {
+  background: var(--success);
+}
+
+#toast.error .toast-icon {
+  background: var(--danger);
+}
+
+.notification-list {
+  position: absolute;
+  top: 56px;
+  right: 24px;
+  z-index: 10;
+  width: 360px;
+  max-width: 92vw;
+  max-height: 70vh;
+  margin: 0;
+  overflow-y: auto;
+  color: var(--text);
+  box-shadow: 0 6px 24px rgba(31, 26, 51, 0.18);
+}
+
+.notification {
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.notification.unread {
+  font-weight: 600;
+}
+
+.notification small {
+  display: block;
+  font-weight: 400;
+}
+
+.bell-button {
+  padding: 5px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  background: transparent;
+  color: #ffffff;
+  font: inherit;
+  cursor: pointer;
+}
+
+
+/* 12. Assistant chat
+   -------------------------------------------------------------------------- */
+.chat-box {
+  max-height: 380px;
+  margin-bottom: 12px;
+  overflow-y: auto;
+}
+
+.message {
+  margin: 8px 0;
+  padding: 10px 14px;
+  border-radius: var(--radius-small);
+  background: var(--page-bg);
+  white-space: pre-wrap;
+}
+
+.message.typing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+}
+
+.message .spinner {
+  width: 14px;
+  height: 14px;
+}
+
+.message.mine {
+  background: var(--primary-soft);
+}
+
+.chat-form {
+  display: flex;
+  gap: 10px;
+}
+
+.chat-form input {
+  flex: 1;
+  margin-top: 0;
+}
+
+
+/* 13. Sign-in page (centred on the screen)
+   -------------------------------------------------------------------------- */
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 32px 16px;
+  background: var(--primary);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 460px;
+  padding: 40px;
+  background: var(--card-bg);
+  border-radius: 16px;
+}
+
+.auth-card h1 {
+  color: var(--primary);
+  font-size: 28px;
+}
+
+.auth-card h3 {
+  margin: 24px 0 14px;
+  font-size: 18px;
+}
+
+.auth-card label {
+  font-size: 14px;
+}
+
+.auth-card input {
+  padding: 12px 14px;
+  font-size: 16px;
+}
+
+.auth-card input[name="regNumber"] {
+  text-transform: uppercase;
+}
+
+.auth-card .btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 13px;
+  font-size: 16px;
+}
+
+.auth-card .link-button {
+  display: block;
+  margin: 16px auto 0;
+  color: var(--primary);
+}
+
+
+/* 14. Spinners and loading states
+   -------------------------------------------------------------------------- */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--primary-soft);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.spinner-large {
+  width: 38px;
+  height: 38px;
+  border-width: 3px;
+}
+
+/* Shown in a tab the first time it loads */
+.loading-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 56px 0;
+  color: var(--text-muted);
+}
+
+/* A button that is busy: the text is hidden and a small spinner takes its place */
+.btn {
+  --spinner-color: #ffffff;
+}
+
+.btn-outline {
+  --spinner-color: var(--primary);
+}
+
+.btn-danger {
+  --spinner-color: var(--danger);
+}
+
+.btn.loading {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+
+.btn.loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid var(--spinner-color);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.btn:disabled:not(.loading) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* A list that is being reloaded */
+.refreshing {
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+
+
+/* 15. Certificate
+   Hidden on screen: it only appears in the print window (Print button).
+   Sizes are kept small so everything fits on ONE A4 page.
+   -------------------------------------------------------------------------- */
+.certificate {
+  display: none;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px 36px;
+  background: #ffffff;
+  border: 4px double var(--primary);
+  font-size: 13px;
+}
+
+.cert-header {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+
+/* The logo, centred and fairly large. The BUK badge shows if the file is missing. */
+.cert-logo,
+.cert-logo-fallback {
+  display: block;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 8px;
+  object-fit: contain;
+}
+
+.cert-logo-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.cert-header h1 {
+  color: var(--primary);
+  font-size: 24px;
+}
+
+.cert-header p {
+  margin: 2px 0 0;
+}
+
+.cert-title {
+  margin-top: 10px;
+  font-size: 17px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.cert-statement {
+  margin: 14px 0;
+  text-align: center;
+}
+
+.certificate td,
+.certificate th {
+  padding: 5px 10px;
+}
+
+.cert-table {
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.cert-table td:first-child {
+  width: 40%;
+  color: var(--text-muted);
+}
+
+.cert-qr {
+  margin: 14px 0;
+  text-align: center;
+}
+
+.qr-box {
+  display: inline-block;
+  padding: 6px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+}
+
+.qr-box svg {
+  display: block;
+  width: 120px;
+  height: 120px;
+}
+
+.cert-code {
+  margin: 6px 0 2px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.cert-section {
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.cert-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+
+/* 16. Verification page (public, opened from the QR code)
+   -------------------------------------------------------------------------- */
+.verify-card {
+  text-align: center;
+}
+
+.verify-card label {
+  text-align: left;
+}
+
+.verify-result {
+  margin: 22px 0;
+  padding: 18px;
+  border-radius: var(--radius);
+}
+
+.verify-result.valid {
+  background: var(--success-bg);
+}
+
+.verify-result.invalid {
+  background: var(--danger-bg);
+}
+
+.verify-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 8px;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.valid .verify-icon {
+  background: var(--success);
+}
+
+.invalid .verify-icon {
+  background: var(--danger);
+}
+
+.verify-table {
+  margin-top: 12px;
+  text-align: left;
+}
+
+.verify-table td {
+  border-bottom-color: rgba(31, 26, 51, 0.1);
+}
+
+.verify-table td:first-child {
+  width: 42%;
+  color: var(--text-muted);
+}
+
+
+/* 17. Small screens and printing
+   -------------------------------------------------------------------------- */
+@media (max-width: 600px) {
+  .top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .container {
+    padding: 0 14px;
+  }
+
+  .certificate {
+    padding: 22px 16px;
+  }
+}
+
+/* When printing, only the certificate is kept */
+@page {
+  margin: 10mm;
+}
+
+@media print {
+  body {
+    background: #ffffff;
+  }
+
+  .top-bar,
+  .tabs,
+  .notification-list,
+  #toast,
+  #current-request,
+  #earlier-requests,
+  .cert-toolbar {
+    display: none;
+  }
+
+  .container {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .certificate {
+    display: block;
+    max-width: none;
+    margin: 0;
+    page-break-inside: avoid;
+  }
+
+  .certificate,
+  .certificate * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

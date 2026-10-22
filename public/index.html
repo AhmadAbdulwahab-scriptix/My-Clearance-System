@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sign in - Student Clearance</title>
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+
+  <body class="auth-page">
+    <div class="auth-card">
+      <h1>Student Clearance</h1>
+      <p class="muted">Department of Software Engineering</p>
+
+      <!-- Sign in form -->
+      <form id="login-form">
+        <h3>Sign in</h3>
+
+        <label>
+          Email
+          <input name="email" type="email" required autocomplete="username">
+        </label>
+
+        <label>
+          Password
+          <input name="password" type="password" required autocomplete="current-password">
+        </label>
+
+        <button class="btn">Sign in</button>
+        <button type="button" class="link-button" id="show-register">Create a student account</button>
+      </form>
+
+      <!-- Registration form (hidden until the link above is clicked) -->
+      <form id="register-form" hidden>
+        <h3>Student registration</h3>
+
+        <label>
+          Full name
+          <input name="name" required>
+        </label>
+
+        <label>
+          Registration number
+          <input name="regNumber" required placeholder="e.g. CST/22/SWE/0001">
+        </label>
+
+        <label>
+          Email
+          <input name="email" type="email" required>
+        </label>
+
+        <label>
+          Password (at least 6 characters)
+          <input name="password" type="password" minlength="6" required>
+        </label>
+
+        <button class="btn">Register</button>
+        <button type="button" class="link-button" id="show-login">Back to sign in</button>
+      </form>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/index.js"></script>
+  </body>
+</html>

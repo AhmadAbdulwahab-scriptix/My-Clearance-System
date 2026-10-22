@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Verify certificate - Bayero University Kano</title>
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+
+  <!-- Public page: nobody has to sign in to check a certificate. -->
+  <body class="auth-page">
+    <div class="auth-card verify-card">
+      <img class="cert-logo" id="verify-logo" src="img/buk-logo.png" alt="Bayero University Kano logo">
+      <div class="cert-logo-fallback" id="verify-logo-fallback" hidden>BUK</div>
+
+      <h1>Certificate verification</h1>
+      <p class="muted">Bayero University Kano</p>
+
+      <!-- The result (valid / not found / problem) is drawn here by js/verify.js -->
+      <div id="result"></div>
+
+      <form id="lookup-form">
+        <label>
+          Check a certificate code
+          <input name="code" required placeholder="CLR-...">
+        </label>
+        <button class="btn">Verify</button>
+      </form>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/verify.js"></script>
+  </body>
+</html>

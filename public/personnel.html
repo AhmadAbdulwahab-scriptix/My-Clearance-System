@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Office queue</title>
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+
+  <body>
+    <main class="container">
+
+      <!-- Tab 1: items waiting for this officer -->
+      <section id="tab-queue">
+        <div class="card">
+          <div class="row">
+            <h2>Waiting for your review</h2>
+            <input id="queue-search" style="max-width: 260px" placeholder="Search name or reg. no.">
+          </div>
+          <div class="table-wrap" id="queue-list"></div>
+        </div>
+      </section>
+
+      <!-- Tab 2: items this officer already decided -->
+      <section id="tab-history" hidden>
+        <div class="card">
+          <div class="row">
+            <h2>Reviewed items</h2>
+            <div class="row">
+              <select id="history-status" style="width: auto">
+                <option value="">All decisions</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+              <input id="history-search" placeholder="Search name or reg. no.">
+            </div>
+          </div>
+          <div class="table-wrap" id="history-list"></div>
+        </div>
+      </section>
+
+      <!-- Tab 3: numbers -->
+      <section id="tab-stats" hidden>
+        <div class="stats" id="stats-list"></div>
+      </section>
+
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/personnel.js"></script>
+  </body>
+</html>
