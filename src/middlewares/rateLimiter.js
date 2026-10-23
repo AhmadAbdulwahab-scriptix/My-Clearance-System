@@ -10,7 +10,7 @@ const ApiError = require('../utils/ApiError');
 function rateLimit({ windowMs, max }) {
   const hits = new Map(); // ip address -> { count, resetAt }
 
-  // Every so often, forget addresses whose time window has ended.
+  // Every so often, forget addresses whose time window has ended. 
     setInterval(() => {
         const now = Date.now();
         for (const [ip, record] of hits) {
