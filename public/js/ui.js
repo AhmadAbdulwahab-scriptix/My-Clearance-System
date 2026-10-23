@@ -497,8 +497,16 @@ function openTab(tab, button) {
     section.hidden = section.id !== 'tab-' + tab.id;
   });
 
-  // Show "Loading..." the first time, remove it when the data has arrived.
   const section = $('#tab-' + tab.id);
+
+  // This tab is still loading from an earlier click: just show it. Do not start
+  // a second load and do not add a second spinner.
+  if (section.dataset.loading === 'yes') {
+    return;
+  }
+  section.dataset.loading = 'yes';
+
+  // Show "Loading..." the first time, remove it when the data has arrived.
   const firstTime = !section.dataset.loaded;
   if (firstTime) {
     section.insertAdjacentHTML('afterbegin', `
@@ -514,5 +522,6 @@ function openTab(tab, button) {
       el.remove();
     });
     section.dataset.loaded = 'yes';
+    section.dataset.loading = 'no';
   });
 }
