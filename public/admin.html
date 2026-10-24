@@ -23,10 +23,13 @@
       <section id="tab-students" hidden>
         <div class="card">
           <form id="students-filter">
-            <div class="filters">
-              <label>
+            <div class="filters" id="students-filters">
+              <label class="search-field">
                 Search
                 <input name="search" placeholder="Name or reg. no.">
+                <button type="button" class="filter-toggle" id="filters-toggle" aria-expanded="false" aria-label="Show more filters">
+                  <svg class="chevron-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
               </label>
               <label>
                 Year in reg. no.

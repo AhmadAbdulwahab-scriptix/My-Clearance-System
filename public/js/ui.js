@@ -2,6 +2,15 @@
 // Needs api.js to be loaded first.
 
 
+/* ---------- Icons (small inline pictures, so nothing has to be downloaded) ---------- */
+
+const ICONS = {
+  bell: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
+  menu: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>',
+  chevron: '<svg class="chevron-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>',
+};
+
+
 /* ---------- Small helpers ---------- */
 
 function $(selector) {
@@ -359,7 +368,10 @@ async function loadNotifications() {
     }
   });
 
-  $('#unread-count').textContent = unreadCount > 0 ? '(' + unreadCount + ')' : '';
+  // The red number on the bell (hidden when there is nothing unread)
+  const badge = $('#unread-count');
+  badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+  badge.hidden = unreadCount === 0;
 
   // Build the list (show the latest 30)
   let listHtml = '';
@@ -431,16 +443,26 @@ function startPage(role, tabs) {
   document.body.insertAdjacentHTML('afterbegin', `
     <header class="top-bar">
       <div class="brand">
-        Student Clearance
+        <strong>Student Clearance</strong>
         <span>Department of Software Engineering</span>
       </div>
       <div class="user-area">
-        <button class="bell-button" id="bell">Notifications <span id="unread-count"></span></button>
-        <span>${escapeHtml(currentUser.name)}${officeText}</span>
-        <button class="link-button" id="sign-out">Sign out</button>
+        <span class="user-name">${escapeHtml(currentUser.name)}${officeText}</span>
+        <button class="link-button sign-out-desktop" id="sign-out">Sign out</button>
       </div>
+      <button class="bell-button" id="bell" aria-label="Notifications">
+        ${ICONS.bell}
+        <span class="bell-badge" id="unread-count" hidden></span>
+      </button>
+      <div class="card notification-list" id="notification-list" hidden></div>
     </header>
-    <div class="card notification-list" id="notification-list" hidden></div>
+
+    <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="tabs">
+      ${ICONS.menu}
+      <span>Menu</span>
+      <span class="menu-current" id="menu-current"></span>
+      ${ICONS.chevron}
+    </button>
     <nav class="tabs" id="tabs"></nav>
   `);
 
@@ -448,6 +470,12 @@ function startPage(role, tabs) {
   $('#bell').addEventListener('click', function () {
     const list = $('#notification-list');
     list.hidden = !list.hidden;
+  });
+
+  // Phones: the tabs are hidden behind the Menu button.
+  $('#menu-toggle').addEventListener('click', function () {
+    const isOpen = $('#tabs').classList.toggle('open');
+    this.setAttribute('aria-expanded', isOpen);
   });
 
   // Which tab to open first? The one named in the address (#items), so a
@@ -474,6 +502,13 @@ function startPage(role, tabs) {
     }
   });
 
+  // Phones: Sign out sits at the bottom of the menu (hidden on bigger screens).
+  const menuSignOut = document.createElement('button');
+  menuSignOut.className = 'menu-signout';
+  menuSignOut.textContent = 'Sign out';
+  menuSignOut.addEventListener('click', logout);
+  nav.append(menuSignOut);
+
   tryAction(loadNotifications);
   setInterval(function () {
     loadNotifications().catch(function () {});
@@ -488,6 +523,11 @@ function openTab(tab, button) {
     b.classList.remove('active');
   });
   button.classList.add('active');
+
+  // phones: show the open tab's name on the Menu button and close the menu
+  $('#menu-current').textContent = tab.label;
+  $('#tabs').classList.remove('open');
+  $('#menu-toggle').setAttribute('aria-expanded', 'false');
 
   // remember this tab in the address bar (without adding a history entry)
   history.replaceState(null, '', '#' + tab.id);

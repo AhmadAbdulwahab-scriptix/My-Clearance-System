@@ -90,30 +90,45 @@ small {
    -------------------------------------------------------------------------- */
 .top-bar {
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  grid-template-areas: "brand user bell";
   align-items: center;
-  justify-content: space-between;
+  column-gap: 16px;
   padding: 14px 24px;
   background: var(--primary);
   color: #ffffff;
 }
 
 .top-bar .brand {
+  grid-area: brand;
+}
+
+.top-bar .brand strong {
+  display: block;
   font-size: 17px;
   font-weight: 600;
 }
 
+/* "Department of Software Engineering" sits under the title on every screen size */
 .top-bar .brand span {
-  margin-left: 10px;
+  display: block;
   font-size: 13px;
   font-weight: 400;
   opacity: 0.8;
 }
 
 .top-bar .user-area {
+  grid-area: user;
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+/* Only shown on phones: see section 17 */
+.menu-toggle,
+.tabs .menu-signout {
+  display: none;
 }
 
 .tabs {
@@ -275,6 +290,15 @@ textarea:focus {
 input[type="checkbox"] {
   width: auto;
   margin-right: 6px;
+}
+
+/* The arrow inside the Search box that shows more filters (phones only) */
+.search-field {
+  position: relative;
+}
+
+.filter-toggle {
+  display: none;
 }
 
 /* Grid of filter fields */
@@ -492,13 +516,13 @@ dialog::backdrop {
 
 .notification-list {
   position: absolute;
-  top: 56px;
-  right: 24px;
+  top: 100%;
+  right: 16px;
   z-index: 10;
   width: 360px;
-  max-width: 92vw;
+  max-width: calc(100vw - 32px);
   max-height: 70vh;
-  margin: 0;
+  margin: 6px 0 0;
   overflow-y: auto;
   color: var(--text);
   box-shadow: 0 6px 24px rgba(31, 26, 51, 0.18);
@@ -519,14 +543,41 @@ dialog::backdrop {
   font-weight: 400;
 }
 
+/* The bell icon at the top right, with the number of unread notifications */
 .bell-button {
-  padding: 5px 14px;
+  position: relative;
+  grid-area: bell;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 999px;
+  border-radius: 50%;
   background: transparent;
   color: #ffffff;
-  font: inherit;
   cursor: pointer;
+}
+
+.bell-button:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.bell-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border: 2px solid var(--primary);
+  border-radius: 999px;
+  background: var(--danger);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
 }
 
 
@@ -888,14 +939,117 @@ dialog::backdrop {
 
 /* 17. Small screens and printing
    -------------------------------------------------------------------------- */
-@media (max-width: 600px) {
+@media (max-width: 700px) {
+  /* Header: title and department on the left, bell on the right, user name below */
   .top-bar {
-    flex-direction: column;
-    align-items: flex-start;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "brand bell"
+      "user user";
+    row-gap: 10px;
+    padding: 14px 16px;
+  }
+
+  .top-bar .user-area {
+    font-size: 15px;
+  }
+
+  /* Sign out moves into the menu */
+  .sign-out-desktop {
+    display: none;
+  }
+
+  /* The tabs become a menu */
+  .menu-toggle {
+    display: flex;
+    align-items: center;
     gap: 10px;
+    width: 100%;
+    padding: 12px 16px;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .menu-current {
+    margin-left: auto;
+    color: var(--primary);
+  }
+
+  .chevron-icon {
+    transition: transform 0.2s;
+  }
+
+  .menu-toggle[aria-expanded="true"] .chevron-icon,
+  .filter-toggle[aria-expanded="true"] .chevron-icon {
+    transform: rotate(180deg);
+  }
+
+  .tabs {
+    display: none;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 12px 12px;
+    overflow-x: visible;
+  }
+
+  .tabs.open {
+    display: flex;
+  }
+
+  .tabs button {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: var(--radius-small);
+    text-align: left;
+  }
+
+  /* Sign out at the bottom of the menu */
+  .tabs .menu-signout {
+    display: block;
+    margin-top: 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    color: var(--danger);
+    font-weight: 600;
+  }
+
+  .tabs .menu-signout:hover {
+    background: var(--danger-bg);
+  }
+
+  /* Students filters: only Search shows, the arrow reveals the rest */
+  .filter-toggle {
+    position: absolute;
+    right: 6px;
+    bottom: 5px;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 31px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-small);
+    background: var(--primary-soft);
+    color: var(--primary);
+    cursor: pointer;
+  }
+
+  .search-field input {
+    padding-right: 52px;
+  }
+
+  .filters:not(.open) > label:not(.search-field) {
+    display: none;
   }
 
   .container {
+    margin: 16px auto;
     padding: 0 14px;
   }
 
@@ -915,6 +1069,7 @@ dialog::backdrop {
   }
 
   .top-bar,
+  .menu-toggle,
   .tabs,
   .notification-list,
   #toast,

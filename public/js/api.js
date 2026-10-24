@@ -2,10 +2,7 @@
 
 // When the pages are served by Express (port 5000) we can use a relative URL.
 // Otherwise (for example Live Server) we call the backend directly.
-const API_URL =
-  window.location.hostname === 'localhost'
-    ? 'http://localhost:5000/api'
-    : 'https://my-clearance-system.onrender.com/api';
+const API_URL = location.port === '5000' ? '/api' : 'http://localhost:5000/api';
 
 
 // The logged-in user is saved in the browser (localStorage) at login.

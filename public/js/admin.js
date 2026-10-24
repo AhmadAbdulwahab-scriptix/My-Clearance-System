@@ -73,6 +73,13 @@ async function loadStudents() {
 
 onSubmit($('#students-filter'), loadStudents);
 
+// Phones: the arrow inside the Search box shows or hides the other filters.
+$('#filters-toggle').addEventListener('click', function () {
+  const isOpen = $('#students-filters').classList.toggle('open');
+  this.setAttribute('aria-expanded', isOpen);
+  this.setAttribute('aria-label', isOpen ? 'Hide more filters' : 'Show more filters');
+});
+
 onClick($('#students-reset'), function () {
   $('#students-filter').reset();
   return loadStudents();
