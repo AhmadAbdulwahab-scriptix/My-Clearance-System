@@ -23,6 +23,11 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 
   req.user = user;
+  // If the password was changed after this login token was made (for example by
+  // a password reset), the old token is no longer accepted.
+  if (user.passwordChangedAt && decoded.iat < Math.floor(user.passwordChangedAt.getTime() / 1000)) {
+    throw ApiError.unauthorized('Your password was changed. Please sign in again.');
+  }
   next();
 });
 

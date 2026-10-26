@@ -13,6 +13,7 @@
  * the issue is resolved - there is no auto-resubmission flow yet.
  */
 const ClearanceItem = require('../models/ClearanceItem');
+const User = require('../models/User');
 const notificationService = require('./notificationService');
 
 /**
@@ -39,6 +40,9 @@ async function initializeItems(requestId, studentId, personnelList) {
 
   const personnelById = new Map(personnelList.map((p) => [String(p._id), p]));
 
+  // The email to the officer must say WHICH student the item is from.
+  const student = await User.findById(studentId).select('name');
+
   await Promise.all(
     items
       .filter((it) => it.status === 'pending')
@@ -50,7 +54,8 @@ async function initializeItems(requestId, studentId, personnelList) {
           it.personnel,
           'clearance_pending',
           `A new clearance request is awaiting your review as ${officeName}.`,
-          it._id
+          it._id,
+          { studentName: student ? student.name : undefined, officeName }
         );
       })
   );
@@ -80,10 +85,9 @@ async function tryAdvanceStage(requestId, stage) {
   const nextStage = stage + 1;
   const now = new Date();
 
-  const nextItems = await ClearanceItem.find({ request: requestId, stage: nextStage }).populate(
-    'personnel',
-    'name officeName'
-  );
+  const nextItems = await ClearanceItem.find({ request: requestId, stage: nextStage })
+    .populate('personnel', 'name officeName')
+    .populate('student', 'name');
 
   await Promise.all(
     nextItems.map(async (item) => {
@@ -96,7 +100,11 @@ async function tryAdvanceStage(requestId, stage) {
           item.personnel._id,
           'clearance_pending',
           `A clearance request is now awaiting your review ${item.personnel.officeName ? ` (${item.personnel.officeName})` : ''}.`,
-          item._id
+          item._id,
+          {
+            studentName: item.student ? item.student.name : undefined,
+            officeName: item.personnel.officeName,
+          }
         );
       }
     })

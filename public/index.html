@@ -26,8 +26,30 @@
           <input name="password" type="password" required autocomplete="current-password">
         </label>
 
+        <div class="forgot-row">
+          <button type="button" class="link-button" id="show-forgot">Forgot password?</button>
+        </div>
+
         <button class="btn">Sign in</button>
         <button type="button" class="link-button" id="show-register">Create a student account</button>
+      </form>
+
+      <!-- Forgot password form (hidden until "Forgot password?" is clicked) -->
+      <form id="forgot-form" hidden>
+        <h3>Reset your password</h3>
+        <p class="muted">
+          Enter the email of your account and we will send you a link to choose a new password.
+        </p>
+
+        <label>
+          Email
+          <input name="email" type="email" required autocomplete="username">
+        </label>
+
+        <div class="notice" id="forgot-notice" hidden></div>
+
+        <button class="btn">Send reset link</button>
+        <button type="button" class="link-button" id="back-to-login">Back to sign in</button>
       </form>
 
       <!-- Registration form (hidden until the link above is clicked) -->

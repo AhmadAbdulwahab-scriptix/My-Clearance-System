@@ -1,4 +1,7 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const emailClient = require('../utils/emailClient');
+const { passwordResetTemplate } = require('../templates/emailTemplates');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const { sendSuccess } = require('../utils/apiResponse');
@@ -73,4 +76,92 @@ const getMe = asyncHandler(async (req, res) => {
   sendSuccess(res, 200, 'Current user fetched', { user: req.user.toSafeObject() });
 });
 
-module.exports = { register, login, getMe };
+// Password reset time
+const RESET_MINUTES = 30;
+
+// Only the SHA-256 hash of the token is stored, so a copy of the database
+// cannot be used to reset anybody's password.
+function hashToken(token) {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+/**
+ * POST /api/auth/forgot-password
+ * Body: { email }
+ * Emails a reset link. The answer is always the same, whether or not the
+ * email exists, so nobody can use this to find out who has an account.
+ */
+const forgotPassword = asyncHandler(async (req, res) => {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  if (!email) {
+    throw ApiError.badRequest('email is required');
+  }
+
+  const user = await User.findOne({ email });
+
+  if (user) {
+    const token = crypto.randomBytes(32).toString('hex');
+    user.passwordResetToken = hashToken(token);
+    user.passwordResetExpires = new Date(Date.now() + RESET_MINUTES * 60 * 1000);
+    await user.save({ validateBeforeSave: false });
+
+    // The link points at the reset page of this same website.
+    const protocol = req.get('x-forwarded-proto') || req.protocol;
+    const base = (process.env.FRONTEND_URL || `${protocol}://${req.get('host')}`).replace(/\/$/, '');
+    const resetUrl = `${base}/reset-password.html?token=${token}`;
+
+    // Not awaited on purpose: the reply is as fast for an unknown email as for
+    // a known one, so response time gives nothing away either.
+    emailClient
+      .sendEmail(
+        user.email,
+        'Reset your clearance system password',
+        `Use this link to choose a new password (valid for ${RESET_MINUTES} minutes): ${resetUrl}`,
+        passwordResetTemplate({ name: user.name, resetUrl, minutes: RESET_MINUTES })
+      )
+      .then((sent) => {
+        if (!sent) {
+          // No email service is set up (or it failed). For a test project the
+          // link can be taken from the server log.
+          logger.warn(`Password reset email NOT sent to ${user.email}. Reset link: ${resetUrl}`);
+        }
+      });
+  }
+
+  sendSuccess(res, 200, 'If an account with that email exists, a reset link has been sent.');
+});
+
+/**
+ * POST /api/auth/reset-password
+ * Body: { token, password }
+ */
+const resetPassword = asyncHandler(async (req, res) => {
+  const { token, password } = req.body;
+
+  if (!token || !password) {
+    throw ApiError.badRequest('token and password are required');
+  }
+  if (String(password).length < 6) {
+    throw ApiError.badRequest('Password must be at least 6 characters');
+  }
+
+  const user = await User.findOne({
+    passwordResetToken: hashToken(String(token)),
+    passwordResetExpires: { $gt: new Date() },
+  });
+
+  if (!user) {
+    throw ApiError.badRequest('This reset link is invalid or has expired. Please request a new one.');
+  }
+
+  user.password = password; // hashed by the model's pre-save hook
+  user.passwordResetToken = undefined; // one use only
+  user.passwordResetExpires = undefined;
+  user.passwordChangedAt = new Date(); // lets protect() reject older login tokens
+  await user.save();
+
+  logger.info(`Password reset completed for ${user.email}`);
+  sendSuccess(res, 200, 'Password changed. You can now sign in.');
+});
+
+module.exports = { register, login, getMe, forgotPassword, resetPassword };

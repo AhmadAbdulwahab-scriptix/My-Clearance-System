@@ -119,6 +119,20 @@ const baseStyle = `
   }
 `;
 
+// Where the buttons in emails lead. FRONTEND_URL is set in .env (and on Render).
+// index.html is the sign-in page, which sends a signed-in user straight to their own page.
+const APP_URL = (process.env.FRONTEND_URL || 'http://localhost:5000').replace(/\/$/, '');
+const DASHBOARD_URL = `${APP_URL}/index.html`;
+
+// Stops a name or a message from being read as HTML.
+function esc(text) {
+  return String(text ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 function getBaseTemplate(content) {
   return `
     <!DOCTYPE html>
@@ -147,24 +161,48 @@ function getBaseTemplate(content) {
 }
 
 /**
- * Template: Clearance item pending (for personnel)
+ * Template: Clearance item pending.
+ * Sent to an OFFICER when an item is waiting for them, and to a STUDENT when
+ * one of their items is reopened. recipientRole decides which wording is used.
  */
-function clearancePendingTemplate({ studentName, officeName, itemDetails }) {
-  const content = `
+function clearancePendingTemplate({ studentName, officeName, recipientRole }) {
+  const student = esc(studentName || 'a student');
+  const office = esc(officeName || 'your office');
+
+  if (recipientRole === 'student') {
+    return getBaseTemplate(`
+      <div class="content">
+        <h2>Your clearance item was reopened</h2>
+        <p>Hello <strong>${student}</strong>,</p>
+        <p>Your clearance item with <strong>${office}</strong> has been reopened and is back in the office's queue for review.</p>
+
+        <div class="details-box">
+          <p><strong>Office:</strong> ${office}</p>
+          <p><strong>Status:</strong> <span class="badge badge-warning">Pending Review</span></p>
+        </div>
+
+        <a href="${DASHBOARD_URL}" class="button">
+          View My Clearance
+        </a>
+      </div>
+    `);
+  }
+
+  return getBaseTemplate(`
     <div class="content">
-      <h2>🎓 New Clearance Item Awaiting Review</h2>
+      <h2>New Clearance Item Awaiting Review</h2>
       <p>Hello,</p>
-      <p>A clearance item from <strong>${studentName}</strong> requires your attention.</p>
+      <p>A clearance item from <strong>${student}</strong> requires your attention.</p>
 
       <div class="details-box">
-        <p><strong>Office:</strong> ${officeName}</p>
-        <p><strong>Student:</strong> ${studentName}</p>
+        <p><strong>Office:</strong> ${office}</p>
+        <p><strong>Student:</strong> ${student}</p>
         <p><strong>Status:</strong> <span class="badge badge-warning">Pending Review</span></p>
       </div>
 
       <p>Please log in to the clearance system to review and process this request.</p>
 
-      <a href="${process.env.FRONTEND_URL || 'http://localhost:5000'}/index.html" class="button">
+      <a href="${DASHBOARD_URL}" class="button">
         Review Clearance Request
       </a>
 
@@ -173,8 +211,7 @@ function clearancePendingTemplate({ studentName, officeName, itemDetails }) {
         Timely responses help students complete their clearance process efficiently.
       </p>
     </div>
-  `;
-  return getBaseTemplate(content);
+  `);
 }
 
 /**
@@ -197,8 +234,8 @@ function clearanceApprovedTemplate({ officeName, studentName, remainingOffices }
         ? '<p>You are one step closer to completing your clearance. Keep tracking your progress!</p>'
         : '<p>🎉 Congratulations! All clearance items have been approved. Your clearance is complete!</p>'}
 
-      <a href="${process.env.FRONTEND_URL || 'http://localhost:5000'}/index.html" class="button">
-        View Your index.html
+      <a href="${DASHBOARD_URL}" class="button">
+        View Your Dashboard
       </a>
     </div>
   `;
@@ -224,7 +261,7 @@ function clearanceRejectedTemplate({ officeName, studentName, reason, category }
 
       <p>Please address the issue mentioned above and resubmit your clearance request if necessary.</p>
 
-      <a href="${process.env.FRONTEND_URL || 'http://localhost:5000'}/index.html" class="button">
+      <a href="${DASHBOARD_URL}" class="button">
         View Details
       </a>
 
@@ -254,8 +291,8 @@ function clearanceCompletedTemplate({ studentName, completedDate }) {
 
       <p>All offices have approved your clearance. You can now download your clearance certificate from the index.html.</p>
 
-      <a href="${process.env.FRONTEND_URL || 'http://localhost:5000'}/index.html" class="button">
-        Download Certificate
+      <a href="${DASHBOARD_URL}" class="button">
+        Get Certificate
       </a>
 
       <div class="divider"></div>
@@ -287,7 +324,7 @@ function delayReminderTemplate({ personnelName, studentName, officeName, daysPen
 
       <p>The student is waiting for your response. Please review this clearance item at your earliest convenience.</p>
 
-      <a href="${process.env.FRONTEND_URL || 'http://localhost:5000'}/index.html" class="button">
+      <a href="${DASHBOARD_URL}" class="button">
         Review Now
       </a>
 
@@ -329,6 +366,32 @@ function generateEmailHTML(type, data) {
   }
 }
 
+/**
+ * Template: Password reset link
+ */
+function passwordResetTemplate({ name, resetUrl, minutes }) {
+  return getBaseTemplate(`
+    <div class="content">
+      <h2>Reset your password</h2>
+      <p>Hello <strong>${esc(name)}</strong>,</p>
+      <p>We received a request to reset the password of your clearance system account. Use the button below to choose a new one. The link works for ${minutes} minutes and can be used once.</p>
+
+      <a href="${resetUrl}" class="button">
+        Choose a New Password
+      </a>
+
+      <p style="font-size: 13px; color: #6b7280;">
+        If the button does not work, copy this address into your browser:<br>${esc(resetUrl)}
+      </p>
+
+      <div class="divider"></div>
+      <p style="font-size: 13px; color: #6b7280;">
+        If you did not ask for this, you can ignore this email. Your password will not change.
+      </p>
+    </div>
+  `);
+}
+
 module.exports = {
   generateEmailHTML,
   clearancePendingTemplate,
@@ -336,4 +399,5 @@ module.exports = {
   clearanceRejectedTemplate,
   clearanceCompletedTemplate,
   delayReminderTemplate,
+  passwordResetTemplate
 };

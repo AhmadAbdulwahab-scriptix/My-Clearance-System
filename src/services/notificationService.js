@@ -41,15 +41,16 @@ async function notify(recipientId, type, message, relatedItemId = null, emailDat
 
   // Best-effort email alongside the in-app notification. Never throws.
   try {
-    const recipient = await User.findById(recipientId).select('email name');
+    const recipient = await User.findById(recipientId).select('email name role');;
     if (recipient && recipient.email) {
       const subject = EMAIL_SUBJECTS[type] || 'Clearance system notification';
 
       // Generate beautiful HTML email
       const htmlBody = generateEmailHTML(type, {
         ...emailData,
-        studentName: emailData.studentName || recipient.name,
+        studentName: emailData.studentName || (recipient.role === 'student' ? recipient.name : undefined),
         personnelName: emailData.personnelName || recipient.name,
+        recipientRole: recipient.role,
         message,
       });
       console.log(`${emailData.studentName}, ${emailData.personnelName}`);

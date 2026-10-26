@@ -301,6 +301,53 @@ input[type="checkbox"] {
   display: none;
 }
 
+/* Show / hide password: the eye button sits inside the box */
+.password-field {
+  position: relative;
+  display: block;
+}
+
+.password-field input.with-toggle {
+  padding-right: 48px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--text-muted);
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.password-toggle:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+/* Short message inside a form (for example "reset link sent") */
+.notice {
+  margin: 4px 0 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-small);
+  background: var(--success-bg);
+  color: #0b6b36;
+  font-size: 14px;
+}
+
+.notice.error {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
 /* Grid of filter fields */
 .filters {
   display: grid;
@@ -671,6 +718,23 @@ dialog::backdrop {
   margin-top: 8px;
   padding: 13px;
   font-size: 16px;
+}
+
+.auth-card a.btn {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+}
+
+.auth-card .forgot-row {
+  margin: -4px 0 6px;
+  text-align: right;
+}
+
+.auth-card .forgot-row .link-button {
+  display: inline;
+  margin: 0;
+  font-size: 14px;
 }
 
 .auth-card .link-button {

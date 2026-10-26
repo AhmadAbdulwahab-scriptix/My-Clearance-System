@@ -1,7 +1,7 @@
 // api.js - everything about talking to the backend and the logged-in user.
 
-// When the pages are served by Express (port 5000) we can use a relative URL.
-// Otherwise (for example Live Server) we call the backend directly.
+// On your own computer the backend runs on port 5000. Anywhere else (the live
+// website) the pages talk to the deployed backend.
 const API_URL =
   window.location.hostname === 'localhost'
     ? 'http://localhost:5000/api'
@@ -51,6 +51,14 @@ async function api(path, options) {
   }
 
   // Step 1: send the request
+  // Free hosting puts the server to sleep when nobody uses it, so the first
+  // request can take up to a minute. Tell the user instead of leaving them guessing.
+  const wakeTimer = setTimeout(function () {
+    if (typeof showToast === 'function') {
+      showToast('Waking up the server... the first request can take up to a minute.');
+    }
+  }, 7000);
+
   let response;
   try {
     response = await fetch(API_URL + path, {
@@ -59,7 +67,9 @@ async function api(path, options) {
       body: body,
     });
   } catch (error) {
-    throw new Error('Cannot reach the server. Check that the backend is running on port 5000.');
+    throw new Error('Cannot reach the server. Check your internet connection and try again.');
+  } finally {
+    clearTimeout(wakeTimer);
   }
 
   // Step 2: read the JSON the server sent back

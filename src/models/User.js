@@ -68,6 +68,18 @@ const userSchema = new mongoose.Schema(
       trim: true,
       default: 'Software Engineering',
     },
+
+    passwordResetToken: { 
+      type: String, 
+      select: false 
+    },
+    passwordResetExpires: {
+      type: Date, 
+      select: false 
+    },
+    passwordChangedAt: {
+      type: Date 
+    },
   },
   { timestamps: true }
 );
