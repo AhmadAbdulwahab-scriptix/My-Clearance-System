@@ -1108,7 +1108,7 @@ dialog::backdrop {
     padding-right: 52px;
   }
 
-  .filters:not(.open) > label:not(.search-field) {
+  .filters.collapsible:not(.open) > label:not(.search-field) {
     display: none;
   }
 
