@@ -157,11 +157,26 @@ const listStudents = asyncHandler(async (req, res) => {
       const itemQuery = { request: { $in: requestIds } };
 
       if (hasRejection === 'true') {
-        itemQuery.status = 'rejected';
+        itemQuery.$or = [
+          { status: 'rejected' },
+          { 'rejectionHistory.0': { $exists: true } },
+          { rejectionReason: { $ne: null } },
+        ];
       }
 
       if (rejectionCategory) {
-        itemQuery.rejectionCategory = rejectionCategory;
+        const catQuery = {
+          $or: [
+            { rejectionCategory: rejectionCategory },
+            { 'rejectionHistory.category': rejectionCategory },
+          ],
+        };
+        if (itemQuery.$or) {
+          itemQuery.$and = [{ $or: itemQuery.$or }, catQuery];
+          delete itemQuery.$or;
+        } else {
+          itemQuery.$or = catQuery.$or;
+        }
       }
 
       if (overdueDays) {
@@ -363,13 +378,98 @@ function sortStudents(students, sortParam) {
 /**
  * GET /api/admin/analytics/rejections
  * Rejection-cause breakdown by category (feeds off AI Component 3's output).
+ * Optional ?status=open|resolved (default: all/any rejections ever recorded).
  */
 const getRejectionAnalytics = asyncHandler(async (req, res) => {
-  const breakdown = await ClearanceItem.aggregate([
-    { $match: { status: 'rejected' } },
-    { $group: { _id: '$rejectionCategory', count: { $sum: 1 } } },
-    { $sort: { count: -1 } },
+  const { status } = req.query; // 'open', 'resolved', or undefined/'all'/'any'
+
+  const matchStage = {};
+  if (status === 'open') {
+    matchStage['rejectionHistory.status'] = 'open';
+  } else if (status === 'resolved') {
+    matchStage['rejectionHistory.status'] = 'resolved';
+  }
+
+  // 1. Rejection history aggregation
+  const historyPipeline = [
+    { $unwind: '$rejectionHistory' },
+  ];
+  if (Object.keys(matchStage).length > 0) {
+    historyPipeline.push({ $match: matchStage });
+  }
+  historyPipeline.push(
+    {
+      $project: {
+        category: {
+          $ifNull: ['$rejectionHistory.category', 'Other'],
+        },
+      },
+    },
+    {
+      $group: {
+        _id: '$category',
+        count: { $sum: 1 },
+      },
+    }
+  );
+
+  const historyResults = await ClearanceItem.aggregate(historyPipeline);
+
+  // 2. Legacy fallback for items that have rejectionCategory/rejectionReason but empty/missing rejectionHistory
+  const legacyMatch = {
+    $and: [
+      {
+        $or: [
+          { rejectionHistory: { $exists: false } },
+          { rejectionHistory: { $size: 0 } },
+        ],
+      },
+      {
+        $or: [
+          { rejectionCategory: { $ne: null } },
+          { rejectionReason: { $ne: null } },
+        ],
+      },
+    ],
+  };
+
+  if (status === 'open') {
+    legacyMatch.$and.push({ status: 'rejected' });
+  } else if (status === 'resolved') {
+    legacyMatch.$and.push({ status: { $ne: 'rejected' } });
+  }
+
+  const legacyResults = await ClearanceItem.aggregate([
+    { $match: legacyMatch },
+    {
+      $project: {
+        category: {
+          $ifNull: ['$rejectionCategory', 'Other'],
+        },
+      },
+    },
+    {
+      $group: {
+        _id: '$category',
+        count: { $sum: 1 },
+      },
+    },
   ]);
+
+  // Combine historyResults and legacyResults into a single map
+  const countsMap = {};
+  historyResults.forEach((r) => {
+    const cat = r._id || 'Other';
+    countsMap[cat] = (countsMap[cat] || 0) + r.count;
+  });
+  legacyResults.forEach((r) => {
+    const cat = r._id || 'Other';
+    countsMap[cat] = (countsMap[cat] || 0) + r.count;
+  });
+
+  const breakdown = Object.entries(countsMap)
+    .map(([_id, count]) => ({ _id, count }))
+    .sort((a, b) => b.count - a.count);
 
   sendSuccess(res, 200, 'Rejection analytics fetched', { breakdown });
 });
@@ -497,8 +597,54 @@ const getDashboardOverview = asyncHandler(async (req, res) => {
     }
   ]);
 
-  // Total rejections
-  const totalRejections = await ClearanceItem.countDocuments({ status: 'rejected' });
+  // Total and Open rejections across history + legacy
+  const historyStats = await ClearanceItem.aggregate([
+    { $unwind: '$rejectionHistory' },
+    {
+      $group: {
+        _id: '$rejectionHistory.status',
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+
+  let totalRejections = 0;
+  let openRejections = 0;
+  let resolvedRejections = 0;
+
+  historyStats.forEach((s) => {
+    totalRejections += s.count;
+    if (s._id === 'open') openRejections += s.count;
+    if (s._id === 'resolved') resolvedRejections += s.count;
+  });
+
+  // Legacy fallback for pre-history items
+  const legacyItems = await ClearanceItem.find({
+    $and: [
+      {
+        $or: [
+          { rejectionHistory: { $exists: false } },
+          { rejectionHistory: { $size: 0 } },
+        ],
+      },
+      {
+        $or: [
+          { rejectionCategory: { $ne: null } },
+          { rejectionReason: { $ne: null } },
+          { status: 'rejected' },
+        ],
+      },
+    ],
+  }).select('status').lean();
+
+  legacyItems.forEach((item) => {
+    totalRejections++;
+    if (item.status === 'rejected') {
+      openRejections++;
+    } else {
+      resolvedRejections++;
+    }
+  });
 
   sendSuccess(res, 200, 'Dashboard overview fetched', {
     totalStudents,
@@ -507,7 +653,9 @@ const getDashboardOverview = asyncHandler(async (req, res) => {
     completedThisWeek,
     avgCompletionDays,
     bottleneckOffices,
-    totalRejections
+    totalRejections,
+    openRejections,
+    resolvedRejections,
   });
 });
 
@@ -581,6 +729,14 @@ const overrideApprove = asyncHandler(async (req, res) => {
 
   item.status = 'approved';
   item.respondedAt = new Date();
+
+  // Mark any open rejection entry as resolved upon override approve
+  const openEntry = [...item.rejectionHistory].reverse().find(e => e.status === 'open');
+  if (openEntry) {
+    openEntry.status = 'resolved';
+    openEntry.resolvedAt = new Date();
+  }
+
   item.resubmissionHistory.push({
     action: 'resubmitted',
     actor: req.user._id,

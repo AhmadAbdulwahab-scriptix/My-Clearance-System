@@ -150,11 +150,15 @@ function drawHistory() {
       action = `<button class="btn btn-small btn-outline reopen-button" data-id="${item._id}">Reopen</button>`;
     }
 
+    const reasonCol = item.status === 'rejected' && item.rejectionReason
+      ? `${escapeHtml(item.rejectionReason)} <small>${escapeHtml(item.rejectionCategory || '')}</small>`
+      : '-';
+
     rows.push([
       escapeHtml(fieldOf(item.student, 'name')),
       escapeHtml(formatReg(fieldOf(item.student, 'regNumber'))),
       statusBadge(item.status),
-      `${escapeHtml(item.rejectionReason)} <small>${escapeHtml(item.rejectionCategory)}</small>`,
+      reasonCol,
       formatDate(item.respondedAt),
       action,
     ]);

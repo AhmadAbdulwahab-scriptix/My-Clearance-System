@@ -27,7 +27,8 @@ async function loadOverview() {
     { label: 'Completed today', value: data.completedToday },
     { label: 'Completed this week', value: data.completedThisWeek },
     { label: 'Avg. completion (days)', value: data.avgCompletionDays },
-    { label: 'Rejections', value: data.totalRejections },
+    { label: 'Total rejections', value: data.totalRejections },
+    { label: 'Open rejections', value: data.openRejections || 0 },
   ]);
 
   const rows = [];
@@ -114,7 +115,7 @@ function openStudentDetail(studentId, button) {
           item.stage,
           escapeHtml(fieldOf(item.personnel, 'officeName')),
           statusBadge(item.status),
-          escapeHtml(item.rejectionReason),
+          item.status === 'rejected' ? escapeHtml(item.rejectionReason) : '',
           itemActionButtons(item),
         ]);
       });
@@ -372,14 +373,11 @@ onSubmit($('#personnel-form'), async function (event) {
 
 /* ---------- Analytics tab ---------- */
 
-async function loadAnalytics() {
-  // Two independent calls, sent together.
-  const results = await Promise.all([
-    api('/admin/analytics/rejections'),
-    api('/admin/analytics/bottlenecks'),
-  ]);
-  const rejections = results[0].breakdown;
-  const bottlenecks = results[1].bottlenecks;
+async function loadRejectionBars() {
+  const statusFilter = $('#rejection-status') ? $('#rejection-status').value : '';
+  const query = statusFilter ? '?status=' + encodeURIComponent(statusFilter) : '';
+  const data = await api('/admin/analytics/rejections' + query);
+  const rejections = data.breakdown || [];
 
   // Bars: the biggest count gets the longest bar.
   let biggest = 1;
@@ -394,16 +392,21 @@ async function loadAnalytics() {
     const width = (entry.count / biggest) * 60; // percent of the row
     barsHtml += `
       <div class="bar-row">
-        <span class="bar-label">${escapeHtml(entry._id || 'Uncategorised')}</span>
+        <span class="bar-label">${escapeHtml(entry._id || 'Other')}</span>
         <div class="bar-fill" style="width: ${width}%"></div>
         <span>${entry.count}</span>
       </div>
     `;
   });
   if (barsHtml === '') {
-    barsHtml = '<p class="muted">No rejections yet.</p>';
+    barsHtml = '<p class="muted">No rejections found.</p>';
   }
   $('#rejection-bars').innerHTML = barsHtml;
+}
+
+async function loadBottlenecks() {
+  const data = await api('/admin/analytics/bottlenecks');
+  const bottlenecks = data.bottlenecks || [];
 
   // The backend sends durations in milliseconds, so convert to days.
   const rows = [];
@@ -421,6 +424,17 @@ async function loadAnalytics() {
     rows
   );
 }
+
+async function loadAnalytics() {
+  await Promise.all([
+    loadRejectionBars(),
+    loadBottlenecks(),
+  ]);
+}
+
+$('#rejection-status').addEventListener('change', function () {
+  loadRejectionBars();
+});
 
 
 /* ---------- Search tab ---------- */

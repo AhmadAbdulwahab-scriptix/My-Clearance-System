@@ -1,9 +1,9 @@
 /* ==========================================================================
-   Student Clearance System - stylesheet
-   Look and feel inspired by PalmPay: violet brand colour, white cards on a
-   soft lavender background, rounded corners, pill buttons.
+  Student Clearance System - stylesheet
+  Look and feel inspired by PalmPay: violet brand colour, white cards on a
+  soft lavender background, rounded corners, pill buttons.
 
-   To change the brand colour, edit --primary in the :root block below.
+  To change the brand colour, edit --primary in the :root block below.
    ========================================================================== */
 
 
@@ -677,17 +677,23 @@ dialog::backdrop {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  padding: 32px 16px;
+  height: 100vh;
+  height: 100dvh;
+  padding: 24px 16px;
+  overflow: hidden;
   background: var(--primary);
+  box-sizing: border-box;
 }
 
 .auth-card {
   width: 100%;
   max-width: 460px;
-  padding: 40px;
+  max-height: calc(100dvh - 32px);
+  padding: 36px 32px;
   background: var(--card-bg);
   border-radius: 16px;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .auth-card h1 {
@@ -1119,6 +1125,28 @@ dialog::backdrop {
 
   .certificate {
     padding: 22px 16px;
+  }
+
+  .auth-page {
+    height: 100vh;
+    height: 100dvh;
+    padding: 12px;
+    overflow: hidden;
+  }
+
+  .auth-card {
+    padding: 24px 20px;
+    border-radius: 14px;
+    max-height: calc(100dvh - 24px);
+  }
+
+  .auth-card h1 {
+    font-size: 24px;
+  }
+
+  .auth-card h3 {
+    margin: 16px 0 10px;
+    font-size: 16px;
   }
 }
 

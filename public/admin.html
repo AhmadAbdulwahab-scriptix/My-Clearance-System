@@ -173,7 +173,14 @@
       <!-- Tab 5: analytics -->
       <section id="tab-analytics" hidden>
         <div class="card">
-          <h3>Rejections by category</h3>
+          <div class="row">
+            <h3>Rejections by category</h3>
+            <select id="rejection-status" style="width: auto">
+              <option value="">Any</option>
+              <option value="open">Open</option>
+              <option value="resolved">Resolved</option>
+            </select>
+          </div>
           <div id="rejection-bars"></div>
         </div>
         <div class="card">

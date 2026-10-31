@@ -89,6 +89,17 @@ const clearanceItemSchema = new mongoose.Schema(
       reason: String,
       timestamp: { type: Date, default: Date.now },
     }],
+    // Every rejection this item has ever had, each tracked individually.
+    // An item can be rejected multiple times (e.g. unpaid fee, then wrong doc).
+    // 'open' = issue is still unresolved; 'resolved' = student fixed it / personnel unrejected.
+    rejectionHistory: [{
+      reason: { type: String, trim: true },
+      category: { type: String, enum: [...REJECTION_CATEGORIES, null], default: null },
+      status: { type: String, enum: ['open', 'resolved'], default: 'open' },
+      rejectedAt: { type: Date, default: Date.now },
+      resolvedAt: { type: Date, default: null },
+      actor: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    }],
   },
   { timestamps: true }
 );

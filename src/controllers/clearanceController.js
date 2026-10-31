@@ -206,6 +206,14 @@ const approveItem = asyncHandler(async (req, res) => {
 
   item.status = 'approved';
   item.respondedAt = new Date();
+
+  // Mark any open rejection entry as resolved upon approval
+  const openEntry = [...item.rejectionHistory].reverse().find(e => e.status === 'open');
+  if (openEntry) {
+    openEntry.status = 'resolved';
+    openEntry.resolvedAt = new Date();
+  }
+
   await item.save();
 
   const student = await User.findById(item.student).select('name');
@@ -261,12 +269,21 @@ const rejectItem = asyncHandler(async (req, res) => {
   item.rejectionCategory = category;
   item.respondedAt = new Date();
 
-  // Track rejection in history
+  // Track rejection in history (legacy audit trail)
   item.resubmissionHistory.push({
     action: 'rejected',
     actor: req.user._id,
     reason,
     timestamp: new Date(),
+  });
+
+  // Track as an individual rejection entry for analytics
+  item.rejectionHistory.push({
+    reason,
+    category,
+    status: 'open',
+    rejectedAt: new Date(),
+    actor: req.user._id,
   });
 
   await item.save();
@@ -313,6 +330,13 @@ const unrejectItem = asyncHandler(async (req, res) => {
   item.respondedAt = null;
   item.reminderCount = 0;
   item.lastReminderAt = null;
+
+  // Mark the open rejection entry as resolved
+  const openEntry = [...item.rejectionHistory].reverse().find(e => e.status === 'open');
+  if (openEntry) {
+    openEntry.status = 'resolved';
+    openEntry.resolvedAt = new Date();
+  }
 
   // Track unreject in history
   item.resubmissionHistory.push({
@@ -383,8 +407,14 @@ const resubmitItem = asyncHandler(async (req, res) => {
     timestamp: new Date(),
   });
 
-  // Keep rejection reason visible for context, but clear category
-  item.rejectionCategory = null;
+  // Mark the open rejection entry as resolved
+  const openEntry = [...item.rejectionHistory].reverse().find(e => e.status === 'open');
+  if (openEntry) {
+    openEntry.status = 'resolved';
+    openEntry.resolvedAt = new Date();
+  }
+
+  // Keep rejection reason and category for audit trail
 
   await item.save();
 

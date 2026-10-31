@@ -41,11 +41,14 @@ async function retrieveContext(studentId) {
   if (categories.length) {
     similarCases = await ClearanceItem.find({
       student: { $ne: studentId },
-      rejectionCategory: { $in: categories },
+      $or: [
+        { rejectionCategory: { $in: categories } },
+        { 'rejectionHistory.category': { $in: categories } },
+      ],
       status: 'approved', // resolved cases only - shows the reason was fixable
     })
       .limit(5)
-      .select('rejectionCategory');
+      .select('rejectionCategory rejectionHistory');
   }
 
   return { pending, approved, rejected, locked, similarCases };
