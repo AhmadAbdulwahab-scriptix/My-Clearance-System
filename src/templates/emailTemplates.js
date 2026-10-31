@@ -403,34 +403,27 @@ function personnelWelcomeTemplate({ name, email, officeName, temporaryPassword }
 
   const content = `
     <div class="content">
-      <h2>🔐 Welcome to Clearance Administration</h2>
+      <h2>Welcome to Clearance Administration</h2>
       <p>Hello <strong>${officerName}</strong>,</p>
-      <p>An official clearance personnel account has been created for you as the review officer for <strong>${office}</strong>.</p>
-
-      <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 16px 20px; border-radius: 6px; margin: 20px 0;">
-        <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: #1e40af; text-transform: uppercase; letter-spacing: 0.5px;">
-          🛡️ Zero-Trust Security Protocol
-        </p>
-        <p style="margin: 0; font-size: 13.5px; color: #1e3a8a; line-height: 1.5;">
-          Under our department's <strong>Zero-Trust</strong> credential policy, your initial access password was generated cryptographically by the system and has <em>never</em> been displayed to or stored by the administrator who created your account. Only you have received this password.
-        </p>
-      </div>
+      <p>An official clearance account has been set up for you as the review officer for <strong>${office}</strong>.</p>
 
       <div class="details-box">
-        <p><strong>Assigned Office:</strong> ${office}</p>
-        <p><strong>Login Email:</strong> ${officerEmail}</p>
-        <p><strong>Initial Password:</strong> <code style="display: inline-block; background-color: #e2e8f0; color: #0f172a; padding: 4px 10px; border-radius: 4px; font-size: 15px; font-weight: 700; letter-spacing: 1px;">${tempPass}</code></p>
+        <p><strong>Office:</strong> ${office}</p>
+        <p><strong>Email:</strong> ${officerEmail}</p>
+        <p><strong>Password:</strong> <code style="display: inline-block; background-color: #e2e8f0; color: #0f172a; padding: 4px 10px; border-radius: 4px; font-size: 15px; font-weight: 700; letter-spacing: 1px;">${tempPass}</code></p>
       </div>
 
-      <p>Please log in using these credentials to begin reviewing student clearance submissions:</p>
+      <p style="font-size: 13.5px; color: #4b5563;">
+        Note: Under the system's zero-trust security setup, this password was generated automatically and sent only to you. The administrator cannot view your password.
+      </p>
 
       <a href="${DASHBOARD_URL}" class="button">
-        Access Clearance Portal
+        Sign in to Clearance Portal
       </a>
 
       <div class="divider"></div>
       <p style="font-size: 13px; color: #6b7280; margin: 0;">
-        🔒 <strong>Security Tip:</strong> For security compliance, we recommend updating your password after your first login via the password reset option on the sign-in screen. Never share your credentials with anyone.
+        We recommend changing your password after signing in.
       </p>
     </div>
   `;

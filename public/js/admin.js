@@ -369,7 +369,7 @@ onSubmit($('#personnel-form'), function (event) {
     setLoading(button, true);
     await api('/admin/personnel', { method: 'POST', body: readForm(form) });
     form.reset();
-    showToast('Officer created! Password securely dispatched via email.');
+    showToast('Account created');
     loadPersonnel();
   }, button);
 });

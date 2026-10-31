@@ -84,7 +84,7 @@ const createPersonnel = asyncHandler(async (req, res) => {
     emailHtml
   );
 
-  sendSuccess(res, 201, 'Personnel account created successfully. In accordance with our Zero-Trust policy, the secure credentials have been dispatched directly to the officer via email.', {
+  sendSuccess(res, 201, 'Personnel account created', {
     personnel: personnel.toSafeObject(),
     emailSent,
   });
