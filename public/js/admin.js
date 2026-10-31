@@ -28,7 +28,6 @@ async function loadOverview() {
     { label: 'Completed this week', value: data.completedThisWeek },
     { label: 'Avg. completion (days)', value: data.avgCompletionDays },
     { label: 'Total rejections', value: data.totalRejections },
-    { label: 'Open rejections', value: data.openRejections || 0 },
   ]);
 
   const rows = [];
@@ -362,12 +361,17 @@ $('#personnel-status').addEventListener('change', function () {
   refreshing($('#personnel-list'), loadPersonnel);
 });
 
-onSubmit($('#personnel-form'), async function (event) {
+onSubmit($('#personnel-form'), function (event) {
+  event.preventDefault();
   const form = event.target;
-  await api('/admin/personnel', { method: 'POST', body: readForm(form) });
-  form.reset();
-  showToast('Account created');
-  loadPersonnel();
+  const button = form.querySelector('.btn');
+  tryAction(async function () {
+    setLoading(button, true);
+    await api('/admin/personnel', { method: 'POST', body: readForm(form) });
+    form.reset();
+    showToast('Officer created! Password securely dispatched via email.');
+    loadPersonnel();
+  }, button);
 });
 
 

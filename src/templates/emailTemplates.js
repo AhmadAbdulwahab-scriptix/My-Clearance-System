@@ -392,6 +392,51 @@ function passwordResetTemplate({ name, resetUrl, minutes }) {
   `);
 }
 
+/**
+ * Template: Welcome email for newly created personnel (Zero-Trust Delivery)
+ */
+function personnelWelcomeTemplate({ name, email, officeName, temporaryPassword }) {
+  const officerName = esc(name || 'Officer');
+  const officerEmail = esc(email);
+  const office = esc(officeName || 'Designated Office');
+  const tempPass = esc(temporaryPassword);
+
+  const content = `
+    <div class="content">
+      <h2>🔐 Welcome to Clearance Administration</h2>
+      <p>Hello <strong>${officerName}</strong>,</p>
+      <p>An official clearance personnel account has been created for you as the review officer for <strong>${office}</strong>.</p>
+
+      <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 16px 20px; border-radius: 6px; margin: 20px 0;">
+        <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: #1e40af; text-transform: uppercase; letter-spacing: 0.5px;">
+          🛡️ Zero-Trust Security Protocol
+        </p>
+        <p style="margin: 0; font-size: 13.5px; color: #1e3a8a; line-height: 1.5;">
+          Under our department's <strong>Zero-Trust</strong> credential policy, your initial access password was generated cryptographically by the system and has <em>never</em> been displayed to or stored by the administrator who created your account. Only you have received this password.
+        </p>
+      </div>
+
+      <div class="details-box">
+        <p><strong>Assigned Office:</strong> ${office}</p>
+        <p><strong>Login Email:</strong> ${officerEmail}</p>
+        <p><strong>Initial Password:</strong> <code style="display: inline-block; background-color: #e2e8f0; color: #0f172a; padding: 4px 10px; border-radius: 4px; font-size: 15px; font-weight: 700; letter-spacing: 1px;">${tempPass}</code></p>
+      </div>
+
+      <p>Please log in using these credentials to begin reviewing student clearance submissions:</p>
+
+      <a href="${DASHBOARD_URL}" class="button">
+        Access Clearance Portal
+      </a>
+
+      <div class="divider"></div>
+      <p style="font-size: 13px; color: #6b7280; margin: 0;">
+        🔒 <strong>Security Tip:</strong> For security compliance, we recommend updating your password after your first login via the password reset option on the sign-in screen. Never share your credentials with anyone.
+      </p>
+    </div>
+  `;
+  return getBaseTemplate(content);
+}
+
 module.exports = {
   generateEmailHTML,
   clearancePendingTemplate,
@@ -399,5 +444,6 @@ module.exports = {
   clearanceRejectedTemplate,
   clearanceCompletedTemplate,
   delayReminderTemplate,
-  passwordResetTemplate
+  passwordResetTemplate,
+  personnelWelcomeTemplate,
 };
