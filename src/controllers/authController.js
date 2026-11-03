@@ -98,18 +98,18 @@ const forgotPassword = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findOne({ email });
-
+  
   if (user) {
     const token = crypto.randomBytes(32).toString('hex');
     user.passwordResetToken = hashToken(token);
     user.passwordResetExpires = new Date(Date.now() + RESET_MINUTES * 60 * 1000);
     await user.save({ validateBeforeSave: false });
-
+    
     // The link points at the reset page of this same website.
     const protocol = req.get('x-forwarded-proto') || req.protocol;
     const base = (process.env.FRONTEND_URL || `${protocol}://${req.get('host')}`).replace(/\/$/, '');
     const resetUrl = `${base}/reset-password.html?token=${token}`;
-
+    
     // Not awaited on purpose: the reply is as fast for an unknown email as for
     // a known one, so response time gives nothing away either.
     emailClient

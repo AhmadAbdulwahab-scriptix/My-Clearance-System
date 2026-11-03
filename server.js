@@ -5,7 +5,7 @@ const connectDB = require('./src/config/db');
 const startDelayReminderJob = require('./src/jobs/delayReminderJob');
 const logger = require('./src/utils/logger');
 
-const PORT = process.env.PORT || 5080;
+const PORT = process.env.PORT || 5000;
 
 async function start() {
   await connectDB();

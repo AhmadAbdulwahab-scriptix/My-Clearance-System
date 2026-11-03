@@ -66,7 +66,7 @@ const createPersonnel = asyncHandler(async (req, res) => {
     role: 'personnel',
     officeName,
   });
-
+  
   logger.info(`Admin created personnel account via Zero-Trust: ${personnel.email}`);
 
   // Send Zero-Trust welcome email directly to the personnel
@@ -76,7 +76,7 @@ const createPersonnel = asyncHandler(async (req, res) => {
     officeName: personnel.officeName,
     temporaryPassword,
   });
-
+  
   const emailSent = await sendEmail(
     personnel.email,
     'Your Clearance Officer Account Credentials (Zero-Trust Delivery)',
