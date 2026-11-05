@@ -7,7 +7,6 @@
 function initDocumentViewer() {
   const modal = document.getElementById('document-viewer-modal');
   if (!modal) {
-    console.warn('Document viewer modal element not found in DOM');
     return;
   }
 

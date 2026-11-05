@@ -65,25 +65,7 @@
 
           <!-- Resubmission form -->
           <form id="resubmit-form">
-            <!-- Contextual note section -->
-            <div class="form-group">
-              <label for="resubmit-note">
-                <span class="label-icon" id="resubmit-icon">✏️</span>
-                <span id="resubmit-label">Tell us how you fixed this</span>
-              </label>
-              <textarea
-                id="resubmit-note"
-                name="note"
-                placeholder="Describe how you've resolved the issue..."
-                rows="4"
-                required
-              ></textarea>
-              <small class="hint-text" id="resubmit-hint">
-                Explain what you've done to address the rejection.
-              </small>
-            </div>
-
-            <!-- File upload section -->
+            <!-- File upload section (FIRST) -->
             <div class="form-group" id="documents-section">
               <label>
                 <span class="label-icon">📎</span>
@@ -107,6 +89,24 @@
               <!-- Info text -->
               <small class="hint-text" id="docs-hint">
                 Add files one by one. You can add up to 5 documents total.
+              </small>
+            </div>
+
+            <!-- Contextual note section (AFTER documents) -->
+            <div class="form-group">
+              <label for="resubmit-note">
+                <span class="label-icon" id="resubmit-icon">✏️</span>
+                <span id="resubmit-label">Tell us what you did to fix this</span>
+              </label>
+              <textarea
+                id="resubmit-note"
+                name="note"
+                placeholder="Describe what you've done to address this issue..."
+                rows="4"
+                required
+              ></textarea>
+              <small class="hint-text" id="resubmit-hint">
+                Explain what steps you've taken to resolve the rejection.
               </small>
             </div>
 

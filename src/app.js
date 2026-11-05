@@ -26,17 +26,20 @@ const path = require('path');
 // API routes first (before static files)
 app.use('/api', routes);
 
-// Root route - serve landing page instead of index.html by default
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'landing.html'));
-});
-
-// Keep login.html accessible as login page
+// Explicit routes before static file serving
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'login.html'));
 });
 
-// Static files (after explicit routes so they don't override)
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+});
+
+app.get('/index.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+});
+
+// Static files (for CSS, JS, images, etc.)
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // 404 handler for unknown routes

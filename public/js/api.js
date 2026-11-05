@@ -28,7 +28,7 @@ function saveSession(token, user) {
 
 function logout() {
   localStorage.clear();
-  location.href = 'index.html';
+  location.href = '/login';
 }
 
 
