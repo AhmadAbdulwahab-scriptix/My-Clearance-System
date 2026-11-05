@@ -105,7 +105,7 @@ function showCurrentRequest(request, items, estimate) {
   });
 
   $('#current-request').innerHTML = `
-    <div class="card">
+    <div class="card" data-request-id="${request._id}">
       <div class="row">
         <h2>Clearance request</h2>
         ${statusBadge(request.status)}
@@ -126,31 +126,27 @@ function showCurrentRequest(request, items, estimate) {
 
 function resubmitItem(itemId, button) {
   tryAction(async function () {
-    const answers = await askForm('Resubmit to this office', [
-      { name: 'note', label: 'What changed? (payment made, document attached, etc.)', type: 'textarea', required: true },
-      { name: 'name', label: 'Document name (optional)' },
-      { name: 'url', label: 'Document link (optional)' },
-    ], 'Resubmit');
-
-    if (!answers) {
-      return; // the user pressed Cancel
+    // Get the item details to pass to the modal
+    const requestId = button.closest('[data-request-id]')?.getAttribute('data-request-id');
+    if (!requestId) {
+      showToast('Error: Could not find request ID', 'error');
+      return;
     }
 
-    setLoading(button, true);
+    const results = await Promise.all([
+      api('/clearance/requests/' + requestId),
+    ]);
+    const items = results[0].items;
+    const item = items.find(i => i._id === itemId);
 
-    let documents = [];
-    if (answers.url) {
-      documents = [{ name: answers.name || 'Document', url: answers.url }];
+    if (!item) {
+      showToast('Error: Item not found', 'error');
+      return;
     }
 
-    await api('/clearance/items/' + itemId + '/resubmit', {
-      method: 'PATCH',
-      body: { note: answers.note, documents: documents },
-    });
-
-    showToast('Resubmitted');
-    loadRequest();
-  }, button);
+    // Open the modal with item details
+    openResubmitModal(itemId, item);
+  });
 }
 
 
