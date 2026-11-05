@@ -77,11 +77,37 @@ const clearanceItemSchema = new mongoose.Schema(
       trim: true,
       default: null,
     },
+    // New: Cloudinary-based documents with structured metadata
     resubmissionDocuments: [{
-      name: String,
-      url: String,
+      originalFileName: String,
+      cloudinaryPublicId: String,
+      secure_url: String,
+      fileFormat: String, // 'pdf', 'jpeg', 'png', etc.
+      fileSize: Number, // in bytes
       uploadedAt: { type: Date, default: Date.now },
+      uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     }],
+    // New: Resolution context tied to rejection category
+    resubmissionResolution: {
+      rejectionCategory: {
+        type: String,
+        enum: [...REJECTION_CATEGORIES, null],
+        default: null,
+      },
+      resolutionNote: {
+        type: String,
+        trim: true,
+        default: null,
+      },
+      documentsCount: {
+        type: Number,
+        default: 0,
+      },
+      resolvedAt: {
+        type: Date,
+        default: null,
+      },
+    },
     // Track resubmission history for audit trail
     resubmissionHistory: [{
       action: { type: String, enum: ['rejected', 'resubmitted', 'unreject'] },

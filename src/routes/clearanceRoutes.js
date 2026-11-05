@@ -15,6 +15,7 @@ const {
   getPersonnelHistory,
 } = require('../controllers/clearanceController');
 const { protect, authorize } = require('../middlewares/auth');
+const upload = require('../middlewares/uploadMiddleware');
 
 const router = express.Router();
 
@@ -27,7 +28,7 @@ router.get('/requests/my', authorize('student'), getMyRequests); // /api/clearan
 router.get('/requests/:id', authorize('student', 'personnel', 'admin'), getRequestStatus); // /api/clearance/requests/:id
 router.get('/requests/:id/estimate', authorize('student', 'personnel', 'admin'), getRequestEstimate); // /api/clearance/requests/:id/estimate
 router.get('/requests/:id/certificate', authorize('student', 'personnel', 'admin'), getCertificate); // /api/clearance/requests/:id/certificate
-router.patch('/items/:id/resubmit', authorize('student'), resubmitItem); // /api/clearance/items/:id/resubmit
+router.patch('/items/:id/resubmit', authorize('student'), upload.array('documents', 5), resubmitItem); // /api/clearance/items/:id/resubmit
 
 // --- Personnel ---
 router.get('/items/pending', authorize('personnel'), getPendingItemsForPersonnel); // /api/clearance/items/pending

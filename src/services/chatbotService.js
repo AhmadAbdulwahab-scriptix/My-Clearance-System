@@ -17,15 +17,15 @@ const gemini = require('../utils/geminiClient');
 /**
  * Retrieval step: the student's complete clearance data including all items
  * (pending, approved, rejected), plus anonymized examples of how other students
- * resolved similar rejection categories.
+ * resolved similar rejection categories AT THE SAME OFFICE.
  */
 async function retrieveContext(studentId) {
   // Fetch ALL student's clearance items (not just rejected)
   const allItems = await ClearanceItem.find({
     student: studentId,
   })
-    .populate('personnel', 'name officeName')
-    .select('status rejectionReason rejectionCategory personnel stage unlockedAt respondedAt')
+    .populate('personnel', 'name officeName stage')
+    .select('status rejectionReason rejectionCategory personnel stage unlockedAt respondedAt resubmissionResolution resubmissionDocuments')
     .sort('stage');
 
   // Separate by status for better context
@@ -34,24 +34,50 @@ async function retrieveContext(studentId) {
   const rejected = allItems.filter(item => item.status === 'rejected');
   const locked = allItems.filter(item => item.status === 'locked');
 
-  // Get similar resolved cases for rejected items
-  const categories = [...new Set(rejected.map((r) => r.rejectionCategory).filter(Boolean))];
+  // Get similar resolved cases grouped by office + category
+  // This shows: "At [Office], when students got [Category] rejections, they fixed it by: [resolution]"
+  let similarCasesByOfficeAndCategory = {};
 
-  let similarCases = [];
-  if (categories.length) {
-    similarCases = await ClearanceItem.find({
-      student: { $ne: studentId },
-      $or: [
-        { rejectionCategory: { $in: categories } },
-        { 'rejectionHistory.category': { $in: categories } },
-      ],
-      status: 'approved', // resolved cases only - shows the reason was fixable
-    })
-      .limit(5)
-      .select('rejectionCategory rejectionHistory');
+  if (rejected.length > 0) {
+    for (const rejectedItem of rejected) {
+      const category = rejectedItem.rejectionCategory || 'Other';
+      const office = rejectedItem.personnel?.officeName || 'Unknown Office';
+      const key = `${office}|${category}`;
+
+      // Find OTHER students who had the same category rejection at the SAME office and got approved
+      const similarCases = await ClearanceItem.find({
+        student: { $ne: studentId },
+        personnel: rejectedItem.personnel?._id,
+        rejectionCategory: category,
+        status: 'approved',
+        'resubmissionResolution': { $exists: true, $ne: null },
+      })
+        .limit(3)
+        .select('resubmissionResolution resubmissionDocuments rejectionCategory')
+        .lean();
+
+      if (similarCases.length > 0) {
+        similarCasesByOfficeAndCategory[key] = {
+          office,
+          category,
+          cases: similarCases.map(c => ({
+            resolutionNote: c.resubmissionResolution?.resolutionNote,
+            documentsCount: c.resubmissionResolution?.documentsCount || c.resubmissionDocuments?.length || 0,
+            documentTypes: c.resubmissionDocuments?.map(d => d.fileFormat).join(', '),
+          })),
+          count: similarCases.length,
+        };
+      }
+    }
   }
 
-  return { pending, approved, rejected, locked, similarCases };
+  return {
+    pending,
+    approved,
+    rejected,
+    locked,
+    similarCasesByOfficeAndCategory,
+  };
 }
 
 /**
@@ -119,7 +145,7 @@ function ruleBasedAnswer(question, context) {
 }
 
 async function llmAnswer(question, context) {
-  const { pending, approved, rejected, locked, similarCases } = context;
+  const { pending, approved, rejected, locked, similarCasesByOfficeAndCategory } = context;
 
   const now = new Date();
   const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -158,9 +184,18 @@ async function llmAnswer(question, context) {
     contextText += `LOCKED (${locked.length}): These items are waiting for earlier stages to complete before becoming actionable.\n\n`;
   }
 
-  const similarText = similarCases.length
-    ? `Note: ${similarCases.length} other students resolved similar rejection categories and were later approved.\n`
-    : '';
+  // NEW: Include resolution context from similar cases at the same office
+  let resolutionContextText = '';
+  if (Object.keys(similarCasesByOfficeAndCategory).length > 0) {
+    resolutionContextText = 'HOW OTHER STUDENTS RESOLVED SIMILAR ISSUES AT THEIR OFFICES:\n';
+    for (const [key, data] of Object.entries(similarCasesByOfficeAndCategory)) {
+      resolutionContextText += `\nAt ${data.office} (${data.category} category): ${data.count} student(s) resolved by:\n`;
+      data.cases.forEach((c) => {
+        resolutionContextText += `  - "${c.resolutionNote}" (${c.documentsCount} document${c.documentsCount !== 1 ? 's' : ''}: ${c.documentTypes || 'files'})\n`;
+      });
+    }
+    resolutionContextText += '\nNote: Your situation might be different, but these examples show what worked for others at the same office.\n\n';
+  }
 
   const prompt = `You are the clearance assistant for Bayero University Kano's student clearance system, and you chat like a friendly person, not like a form. Be natural, warm and a little relaxed. Always answer what the student actually asked first, and use their data below whenever it helps.
 
@@ -168,13 +203,13 @@ async function llmAnswer(question, context) {
 
   The one firm rule: when it is about THEIR clearance, stick to the data below. If it is not there, say you don't see it instead of guessing, and don't make up offices, fees or deadlines.
 
-  Good to know: clearance goes through stages in order, and an office stays locked until earlier stages approve. A rejected item can be resubmitted with an explanation or a document link. Offices should respond within ${SLA_DAYS} days. Once every office has approved, clearance is complete and the student can print their certificate from the "My clearance" page.
+  Good to know: clearance goes through stages in order, and an office stays locked until earlier stages approve. A rejected item can be resubmitted with documents and an explanation. Offices should respond within ${SLA_DAYS} days. Once every office has approved, clearance is complete and the student can print their certificate from the "My clearance" page.
 
   Write in plain text, because the chat window does not display markdown. Use as many words as the answer needs, and always finish your answer completely.
 
   STUDENT DATA
   ${contextText}
-  ${similarText}
+  ${resolutionContextText}
   Student's message: "${question}"`;
 
   const text = await gemini.generateText(prompt, { maxOutputTokens: 1024, temperature: 0.8 });

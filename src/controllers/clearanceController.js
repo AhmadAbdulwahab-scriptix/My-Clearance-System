@@ -365,12 +365,14 @@ const unrejectItem = asyncHandler(async (req, res) => {
 
 /**
  * PATCH /api/clearance/items/:id/resubmit
- * Student resubmits a rejected item with updated information/documents.
+ * Student resubmits a rejected item with updated information and/or documents via Cloudinary.
  * Resets the item to pending status and restarts the SLA timer.
- * Body: { note?: string, documents?: [{ name, url }] }
+ * Body: { note: string }
+ * Files: multipart/form-data with 'documents' field
  */
 const resubmitItem = asyncHandler(async (req, res) => {
-  const { note, documents } = req.body;
+  const { note } = req.body;
+  const uploadedFiles = req.files || [];
 
   const item = await ClearanceItem.findById(req.params.id);
   if (!item) throw ApiError.notFound('Clearance item not found');
@@ -382,6 +384,34 @@ const resubmitItem = asyncHandler(async (req, res) => {
     throw ApiError.badRequest('This item is not currently rejected');
   }
 
+  // Validate that at least a note or document was provided
+  if ((!note || !note.trim()) && uploadedFiles.length === 0) {
+    throw ApiError.badRequest('Please provide either a resubmission note or upload documents');
+  }
+
+  // Upload files to Cloudinary if present
+  const cloudinary = require('../utils/cloudinaryClient');
+  const uploadedDocuments = [];
+
+  if (uploadedFiles.length > 0) {
+    for (const file of uploadedFiles) {
+      const cloudResult = await cloudinary.uploadFile(
+        file.buffer,
+        file.originalname,
+        `clearance/resubmissions/${item.request}`
+      );
+      uploadedDocuments.push({
+        originalFileName: cloudResult.originalFileName,
+        cloudinaryPublicId: cloudResult.public_id,
+        secure_url: cloudResult.secure_url,
+        fileFormat: cloudResult.format,
+        fileSize: cloudResult.bytes,
+        uploadedAt: new Date(),
+        uploadedBy: req.user._id,
+      });
+    }
+  }
+
   // Reset to pending and restart SLA timer
   item.status = 'pending';
   item.unlockedAt = new Date(); // Reset SLA timer
@@ -391,19 +421,23 @@ const resubmitItem = asyncHandler(async (req, res) => {
 
   // Store resubmission details
   if (note) item.resubmissionNote = note;
-  if (documents && Array.isArray(documents)) {
-    item.resubmissionDocuments.push(...documents.map(doc => ({
-      name: doc.name,
-      url: doc.url,
-      uploadedAt: new Date(),
-    })));
+  if (uploadedDocuments.length > 0) {
+    item.resubmissionDocuments.push(...uploadedDocuments);
   }
+
+  // Store resolution context tied to rejection category
+  item.resubmissionResolution = {
+    rejectionCategory: item.rejectionCategory,
+    resolutionNote: note || null,
+    documentsCount: uploadedDocuments.length,
+    resolvedAt: new Date(),
+  };
 
   // Track resubmission in history
   item.resubmissionHistory.push({
     action: 'resubmitted',
     actor: req.user._id,
-    reason: note || 'Student resubmitted with updated information',
+    reason: note || `Student resubmitted with ${uploadedDocuments.length} document(s)`,
     timestamp: new Date(),
   });
 
@@ -430,6 +464,8 @@ const resubmitItem = asyncHandler(async (req, res) => {
     {
       officeName: personnel?.officeName || 'Office',
       studentName: student?.name,
+      hasDocuments: uploadedDocuments.length > 0,
+      documentsCount: uploadedDocuments.length,
     }
   );
 
