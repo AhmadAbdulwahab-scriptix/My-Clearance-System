@@ -18,16 +18,31 @@ function matchesSearch(item, text) {
 }
 
 
-// Links to documents the student attached when resubmitting (web links only).
+// Links to documents the student attached when resubmitting (Cloudinary URLs + web links).
 function documentLinks(item) {
   const documents = item.resubmissionDocuments || [];
   let html = '';
   documents.forEach(function (doc) {
-    if (doc.url.indexOf('http') === 0) {
-      html += `<a href="${escapeHtml(doc.url)}" target="_blank" rel="noopener">${escapeHtml(doc.name)}</a> `;
+    // Support both new Cloudinary format (secure_url) and old format (url)
+    const url = doc.secure_url || doc.url;
+    const name = doc.originalFileName || doc.name || 'Document';
+
+    if (url && url.indexOf('http') === 0) {
+      html += `
+        <a href="${escapeHtml(url)}" target="_blank" rel="noopener" title="${escapeHtml(name)}">
+          ${getDocumentIcon(doc.fileFormat || '')} ${escapeHtml(name)}
+        </a>
+      `;
     }
   });
   return html;
+}
+
+// Get icon based on file format
+function getDocumentIcon(fileFormat) {
+  if (fileFormat === 'pdf') return '📄';
+  if (fileFormat && fileFormat.match(/^(jpg|jpeg|png)$/)) return '🖼️';
+  return '📎';
 }
 
 
@@ -52,11 +67,30 @@ function drawQueue() {
     const waiting = daysSince(item.unlockedAt);
     const waitingClass = waiting >= 7 ? 'late' : '';
 
+    // Build resubmission column with note and document viewer
+    let resubmissionHtml = '';
+    if (item.resubmissionNote) {
+      resubmissionHtml += `<div>${escapeHtml(item.resubmissionNote)}</div>`;
+    }
+
+    const documents = item.resubmissionDocuments || [];
+    if (documents.length > 0) {
+      resubmissionHtml += `
+        <button
+          class="btn btn-small btn-outline view-docs-button"
+          data-id="${item._id}"
+          style="margin-top: 8px"
+        >
+          📎 View ${documents.length} document${documents.length !== 1 ? 's' : ''}
+        </button>
+      `;
+    }
+
     rows.push([
       escapeHtml(fieldOf(item.student, 'name')),
       escapeHtml(formatReg(fieldOf(item.student, 'regNumber'))),
       `<span class="${waitingClass}">${waiting} day(s)</span>`,
-      escapeHtml(item.resubmissionNote) + ' ' + documentLinks(item),
+      resubmissionHtml || '(No resubmission)',
       `
         <button class="btn btn-small approve-button" data-id="${item._id}">Approve</button>
         <button class="btn btn-small btn-danger reject-button" data-id="${item._id}">Reject</button>
@@ -72,6 +106,7 @@ function drawQueue() {
 
   onClickAll('.approve-button', approveItem);
   onClickAll('.reject-button', rejectItem);
+  onClickAll('.view-docs-button', viewDocuments);
 }
 
 
@@ -100,7 +135,7 @@ function rejectItem(itemId, button) {
     ], 'Reject');
 
     if (!answers) {
-      return;
+      return; // the user pressed Cancel
     }
 
     setLoading(button, true);
@@ -108,10 +143,25 @@ function rejectItem(itemId, button) {
       method: 'PATCH',
       body: { reason: answers.reason },
     });
-    showToast('Rejected');
 
+    showToast('Rejected');
     removeFromQueue(itemId);
     tryAction(loadQueue);
+  }, button);
+}
+
+
+function viewDocuments(itemId, button) {
+  tryAction(async function () {
+    // Find the item in the queue
+    const item = queueItems.find(i => i._id === itemId);
+    if (!item) {
+      showToast('Error: Item not found', 'error');
+      return;
+    }
+
+    // Open the document viewer modal
+    openDocumentViewer(item);
   }, button);
 }
 

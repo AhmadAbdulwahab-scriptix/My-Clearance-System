@@ -46,8 +46,48 @@
 
     </main>
 
+    <!-- Document Viewer Modal -->
+    <div id="document-viewer-modal" class="modal" hidden>
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Resubmission Documents</h2>
+          <button class="modal-close" id="document-viewer-close">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Document info -->
+          <div class="document-info">
+            <div class="info-row">
+              <span class="label">Student note:</span>
+              <span class="value" id="viewer-note">—</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Documents uploaded:</span>
+              <span class="value" id="viewer-count">0</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Uploaded at:</span>
+              <span class="value" id="viewer-date">—</span>
+            </div>
+          </div>
+
+          <!-- Document list -->
+          <div class="document-list" id="document-list"></div>
+
+          <!-- Close button -->
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline" id="document-viewer-done">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="js/api.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/document-viewer.js"></script>
     <script src="js/personnel.js"></script>
   </body>
 </html>
