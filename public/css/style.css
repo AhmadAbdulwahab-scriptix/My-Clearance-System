@@ -1638,3 +1638,85 @@ dialog::backdrop {
 .empty-state p {
   margin: 0;
 }
+
+/* Document Field Styles (Add Document button approach)
+   -------------------------------------------------------------------------- */
+.document-field {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: var(--page-bg);
+  border-radius: var(--radius-small);
+  border: 1px solid var(--border);
+}
+
+.document-field-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.document-field-number {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.document-field-remove {
+  background: transparent;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  padding: 4px 8px;
+  font-size: 24px;
+  border-radius: var(--radius-small);
+  transition: all 0.2s ease;
+}
+
+.document-field-remove:hover {
+  background: var(--danger-bg);
+}
+
+.file-upload-single {
+  margin-bottom: 12px;
+}
+
+.file-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--primary-soft);
+  border-radius: var(--radius-small);
+  border: 1px solid var(--primary);
+}
+
+.file-preview-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.file-preview-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-preview-name {
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.file-preview-size {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.docs-requirement {
+  font-size: 12px;
+  font-weight: 600;
+}

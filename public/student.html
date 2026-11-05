@@ -84,28 +84,30 @@
             </div>
 
             <!-- File upload section -->
-            <div class="form-group">
-              <label for="resubmit-files">
+            <div class="form-group" id="documents-section">
+              <label>
                 <span class="label-icon">📎</span>
-                Upload Documents (Optional)
+                <span id="docs-label">Upload Documents</span>
+                <span class="docs-requirement" id="docs-requirement">(Optional)</span>
               </label>
-              <div class="file-upload-area" id="file-upload-area">
-                <input
-                  type="file"
-                  id="resubmit-files"
-                  name="documents"
-                  multiple
-                  accept=".pdf,.jpg,.jpeg,.png"
-                >
-                <div class="upload-placeholder">
-                  <div class="upload-icon">📄</div>
-                  <div class="upload-text">
-                    <p>Drag files here or click to browse</p>
-                    <small>PDF, JPG, PNG (up to 5 files, 10MB each)</small>
-                  </div>
-                </div>
-              </div>
-              <div class="file-list" id="file-list"></div>
+
+              <!-- Add document button -->
+              <button
+                type="button"
+                class="btn btn-outline btn-small"
+                id="add-document-btn"
+                style="margin-bottom: 12px; width: 100%"
+              >
+                + Add Document
+              </button>
+
+              <!-- Documents list (dynamically added) -->
+              <div class="documents-list" id="documents-list"></div>
+
+              <!-- Info text -->
+              <small class="hint-text" id="docs-hint">
+                Add files one by one. You can add up to 5 documents total.
+              </small>
             </div>
 
             <!-- Upload progress -->
